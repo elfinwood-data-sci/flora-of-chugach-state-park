@@ -1,6 +1,6 @@
 -- View: public.observation_location_geometry_view
 
-DROP VIEW public.observation_location_geometry_view;
+--DROP VIEW public.observation_location_geometry_view;
 
 CREATE OR REPLACE VIEW public.observation_location_geometry_view AS
 
@@ -32,7 +32,7 @@ uni AS (SELECT 'gbif'::text AS obs_data_source, gbifid::text, decimallatitude, d
 		FROM vouchers2020
 	   )
 
-SELECT obs_data_source, gbifid AS collection_number, decimallatitude, decimallongitude, nameaccepted_with_fungi AS scientific_name, level,
+SELECT ROW_NUMBER() OVER (ORDER BY gbifid) AS ogc_fid, obs_data_source, gbifid AS collection_number, decimallatitude, decimallongitude, nameaccepted_with_fungi AS scientific_name, level,
 	habit, native, nonnative, list,  location_in_chugach_state_park, high_quality_location_data,
 	ST_SetSRID(ST_MakePoint(decimallongitude, decimallatitude),4326) AS geom
 	FROM uni
