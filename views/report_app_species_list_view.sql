@@ -5,6 +5,15 @@ FROM public.gbif_csp_20210211_clipped_foa_taxonomy
 		AND level NOT IN ('genus','NA') 
 	GROUP BY familyy, familyx, acceptedscientificname,nameaccepted, authoraccepted,authors, habit, list, basisofrecord, high_quality_location_data, level
 	ORDER BY familyy, nameaccepted, basisofrecord, high_quality_location_data),
+
+vouch AS (SELECT family AS famx, family AS famy, scientific_name, name_accepted, author, author, habit, list, 
+		  'PRESERVED_SPECIMEN'::text AS basisofrecord, high_quality_location_data, level
+	FROM public.chugach_state_park_vouchers_uaah_template_v02
+	JOIN flora_of_alaska_view ON scientific_name = name_accepted),
+
+uni AS (SELECT * FROM d
+	   UNION ALL
+	   SELECT * FROM vouch),
 	
 funguy AS (SELECT  
 	CASE
@@ -17,7 +26,7 @@ funguy AS (SELECT
 		ELSE authoraccepted
 	END::text AS authoraccepted,
 	habit, list, basisofrecord, high_quality_location_data, level, basisofrecord || ': ' || high_quality_location_data AS basis_loc
-FROM d),
+FROM uni),
 
 inatty_high AS (SELECT family, nameaccepted, authoraccepted, habit, list, level, count(nameaccepted) AS inat_h
 FROM funguy
@@ -37,9 +46,9 @@ GROUP BY family, nameaccepted, authoraccepted, habit, list, level),
 phys_low AS (SELECT family, nameaccepted, authoraccepted, habit, list, level, count(nameaccepted) AS phys_l
 FROM funguy
 WHERE basis_loc = 'PRESERVED_SPECIMEN: false'
-GROUP BY family, nameaccepted, authoraccepted, habit, list, level)
+GROUP BY family, nameaccepted, authoraccepted, habit, list, level),
 
-SELECT subq.family, subq.nameaccepted, subq.authoraccepted, subq.habit, subq.list, subq.level,
+xyz AS (SELECT subq.family, subq.nameaccepted, subq.authoraccepted, subq.habit, subq.list, subq.level,
 	COALESCE(inat_h,0) AS inat_h,
 	COALESCE(inat_l,0) AS inat_l,
 	COALESCE(phys_h,0) AS phys_h,
@@ -51,5 +60,8 @@ LEFT JOIN inatty_high USING (nameaccepted)
 LEFT JOIN inatty_low USING (nameaccepted)
 LEFT JOIN phys_high USING (nameaccepted)
 LEFT JOIN phys_low USING (nameaccepted)
-ORDER BY nameaccepted
+ORDER BY nameaccepted)
+
+SELECT * FROM xyz
+
 	 
