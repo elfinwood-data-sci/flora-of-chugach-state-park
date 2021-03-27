@@ -23,8 +23,12 @@ bubb35 <- bubb[1:35,]
 
 bubb35$family <- reorder(bubb35$family, -bubb35$sort_order)
 
-ggplot(bubb35, aes(x=family, y=total_obs, size = number_of_taxa)) +
+p <- ggplot(bubb35, aes(x=family, y=total_obs, size = as.factor(number_of_taxa_rank))) +
   geom_point(alpha=0.25) +
-  scale_size(range = c(.1, 10), name="Taxa Observed") +
-  theme(axis.text.x = element_text(angle = 45))
+  scale_size_manual(values = c(3, 6, 9), labels = c("<10", "10–30", ">30")) +
+  labs(x = "Family",y = "Number of Observations") +
+  #scale_size(range = c(.1, 10), name="Taxa Observed") +
+  theme(axis.text.x = element_text(angle = 45,vjust = 1,hjust = 1)) 
 
+p1 <- p + labs(size = "Taxa Observed")
+print(p1)
