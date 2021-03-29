@@ -5,7 +5,7 @@ WITH d AS (SELECT basisofrecord_agg AS "Observation Source",
 	END::text AS "Location Quality"
 	FROM public.observation_location_geometry_view)
 	
-	SELECT "Observation Source","Location Quality",count("Observation Source") AS "Number of Observations"
+	SELECT "Location Quality", "Observation Source",count("Observation Source") AS "Number of Observations"
 	FROM d
-	GROUP BY "Observation Source", "Location Quality"
-	ORDER BY "Observation Source","Location Quality","Number of Observations"
+	GROUP BY "Location Quality", "Observation Source"
+	ORDER BY "Location Quality","Observation Source","Number of Observations"
