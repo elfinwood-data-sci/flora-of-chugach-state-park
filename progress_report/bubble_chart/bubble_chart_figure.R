@@ -7,8 +7,8 @@ library('dplyr')
 
 #create connection object
 con <- dbConnect(drv =PostgreSQL(), 
-                 user="aaronwells", 
-                 password="waLatKa08mNts#",
+                 user="", 
+                 password="",
                  host="localhost", 
                  port=5435, 
                  dbname="flora_of_csp")
