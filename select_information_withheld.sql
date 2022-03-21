@@ -3,6 +3,6 @@ observation_office_note, high_quality_location_data, location_in_chugach_state_p
 	FROM public.gbif_csp_20210211_clipped_foa_taxonomy
 	WHERE informationwithheld IS NOT NULL
 AND informationwithheld NOT IN ('NA')
-AND recordedby NOT IN ('Aaron Wells')
+AND recordedby IN ('Aaron Wells','bwelko','Glenn Brown')
 AND observation_office_note IS NULL
 ORDER BY recordedby, nameoriginal
