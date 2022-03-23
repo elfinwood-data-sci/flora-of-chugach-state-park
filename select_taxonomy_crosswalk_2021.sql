@@ -9,7 +9,7 @@ WITH d AS (SELECT kingdom, scientificname, genus, specificepithet, infraspecific
 	
 	g AS (SELECT kingdom, scientificname, sciname FROM d
 	GROUP BY kingdom, scientificname, sciname
-	ORDER BY kingdom, scientificname, sciname)
+	ORDER BY kingdom DESC, scientificname, sciname)
 	
 	SELECT kingdom, scientificname, sciname, name_adjudicated, name_accepted FROM g
 	LEFT JOIN public.flora_of_ak_accepted_join_adjudicated_view ON sciname = name_adjudicated
