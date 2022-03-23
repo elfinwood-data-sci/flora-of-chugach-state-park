@@ -17,8 +17,13 @@ iucnredlistcategory, serial
 	--WHERE coordinateuncertaintyinmeters::integer > 11d
 	ORDER BY coordinateuncertaintyinmeters::integer DESC)
 
-SELECT kingdom, scientificname, count(scientificname) FROM d
+SELECT recordedby, reference, scientificname, year, month, day, verbatimeventdate, coordinateuncertaintyinmeters, informationwithheld 
+FROM d
+WHERE coordinateuncertaintyinmeters IS NOT NULL AND informationwithheld IS NOT NULL
+ORDER BY recordedby DESC, year::integer, month::integer, day::integer
+
+/*SELECT kingdom, scientificname, count(scientificname) FROM d
 GROUP BY kingdom, scientificname
-ORDER BY count(scientificname) DESC --kingdom, scientificname
+ORDER BY count(scientificname) DESC --kingdom, scientificname*/
 
 --SELECT * FROM d WHERE scientificname = 'Botrychium lunaria (L.) Sw.'
