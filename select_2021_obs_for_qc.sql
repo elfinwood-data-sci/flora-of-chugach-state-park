@@ -17,9 +17,9 @@ iucnredlistcategory, serial
 	--WHERE coordinateuncertaintyinmeters::integer > 11d
 	ORDER BY coordinateuncertaintyinmeters::integer DESC)
 
-SELECT recordedby, reference, scientificname, year, month, day, verbatimeventdate, coordinateuncertaintyinmeters, informationwithheld 
+SELECT gbifid, recordedby, reference, scientificname, year, month, day, verbatimeventdate, coordinateuncertaintyinmeters, high_quality_location_data, informationwithheld 
 FROM d
-WHERE coordinateuncertaintyinmeters IS NOT NULL AND informationwithheld IS NOT NULL
+WHERE coordinateuncertaintyinmeters::integer <= 11 --AND informationwithheld IS NOT NULL
 ORDER BY recordedby DESC, year::integer, month::integer, day::integer
 
 /*SELECT kingdom, scientificname, count(scientificname) FROM d
