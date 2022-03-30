@@ -1,16 +1,25 @@
 -- View: public.observation_location_geometry_view
-
+--3161 records from 2020 and previous + 1487 from 2021 iNaturalist (as of March 29) = 4,648
 --DROP VIEW public.observation_location_geometry_view;
 
-CREATE OR REPLACE VIEW public.observation_location_geometry_view AS
+--CREATE OR REPLACE VIEW public.observation_location_geometry_view AS
 
 WITH gbif AS (SELECT gbifid, decimallatitude, decimallongitude,
 	CASE
 		WHEN nameaccepted = 'NA' THEN nameadjudicated
 		ELSE nameaccepted
 	END::text AS nameaccepted_with_fungi, level,
-	habit, native, nonnative, list,  location_in_chugach_state_park, high_quality_location_data,basisofrecord
+	habit, native, nonnative, list,  location_in_chugach_state_park, high_quality_location_data,basisofrecord,year
 FROM public.gbif_csp_20210211_clipped_foa_taxonomy
+			 WHERE location_in_chugach_state_park IS TRUE),
+			 
+gbif21 AS (SELECT gbifid, decimallatitude, decimallongitude,
+	CASE
+		WHEN nameaccepted = 'NA' THEN nameadjudicated
+		ELSE nameaccepted
+	END::text AS nameaccepted_with_fungi, level,
+	habit, native, nonnative, list,  location_in_chugach_state_park, high_quality_location_data,basisofrecord,year
+FROM public.gbif_csp_20220320_clipped_foa_taxonomy
 			 WHERE location_in_chugach_state_park IS TRUE),
 
 vouchers2020 AS (
@@ -26,17 +35,21 @@ specimen_notes, specimen_verifier, lat_deg_min_sec, long_deg_min_sec, high_quali
 			 'PRESERVED_SPECIMEN'::text)
 ),
 uni AS (SELECT 'gbif'::text AS obs_data_source, gbifid::text, decimallatitude, decimallongitude, nameaccepted_with_fungi, level,
-	habit, native, nonnative, list,  location_in_chugach_state_park, high_quality_location_data,basisofrecord 
+	habit, native, nonnative, list,  location_in_chugach_state_park, high_quality_location_data,basisofrecord, year 
 		FROM gbif
 	UNION 
+	SELECT 'gbif'::text AS obs_data_source, gbifid::text, decimallatitude, decimallongitude, nameaccepted_with_fungi, level,
+	habit, native, nonnative, list,  location_in_chugach_state_park, high_quality_location_data,basisofrecord, year 
+		FROM gbif21
+	UNION
 	SELECT 'vouchers'::text AS obs_data_source, collection_number, lat_degrees, lon_degrees, scientific_name, 
-		level, habit, native::text, nonnative::text, list,  'TRUE'::boolean AS location_in_chugach_state_park, high_quality_location_data,
-		basisofrecord
+		level, habit, native::text, nonnative::text, list,  'TRUE'::boolean AS location_in_chugach_state_park, high_quality_location_data, 
+		basisofrecord, year_collected
 		FROM vouchers2020
 	   ),
 
 gm AS (SELECT ROW_NUMBER() OVER (ORDER BY gbifid) AS ogc_fid, obs_data_source, gbifid AS collection_number, decimallatitude, decimallongitude, nameaccepted_with_fungi AS scientific_name, level,
-	habit, native, nonnative, list,  location_in_chugach_state_park, high_quality_location_data,basisofrecord,
+	habit, native, nonnative, list,  location_in_chugach_state_park, high_quality_location_data,basisofrecord, year,
 	CASE
 		WHEN basisofrecord = 'HUMAN_OBSERVATION' THEN 'iNaturalist Obs.'
 		WHEN basisofrecord = 'LIVING_SPECIMEN' THEN 'Physical Specimen'
@@ -51,7 +64,7 @@ gm AS (SELECT ROW_NUMBER() OVER (ORDER BY gbifid) AS ogc_fid, obs_data_source, g
 
 SELECT ogc_fid, obs_data_source, collection_number, decimallatitude, decimallongitude, scientific_name, level,
 	habit, native, nonnative, list,  location_in_chugach_state_park, high_quality_location_data,basisofrecord,
-	basisofrecord_agg, 
+	basisofrecord_agg, year,
 	CASE
 		WHEN basisofrecord_agg = 'iNaturalist Obs.' AND high_quality_location_data IS TRUE THEN 'iNaturalist Obs. High Quality Loc.'
 		WHEN basisofrecord_agg = 'iNaturalist Obs.' AND high_quality_location_data IS FALSE THEN 'iNaturalist Obs. Low Quality Loc.'
@@ -62,9 +75,10 @@ SELECT ogc_fid, obs_data_source, collection_number, decimallatitude, decimallong
 		ELSE 'SOMETHING ELSE'
 	END::text AS basis_loc, 
 	geom
-FROM gm;
+FROM gm
+/*;
 
 ALTER TABLE public.observation_location_geometry_view
     OWNER TO aaronwells;
 COMMENT ON VIEW public.observation_location_geometry_view
-    IS 'This view creates a point geometry layer for the observations in Chugach State Park.';
+    IS 'This view creates a point geometry layer for the observations in Chugach State Park.';*/
