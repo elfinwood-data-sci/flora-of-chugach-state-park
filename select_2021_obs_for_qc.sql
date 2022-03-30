@@ -17,9 +17,11 @@ iucnredlistcategory, serial
 	--WHERE coordinateuncertaintyinmeters::integer > 11d
 	ORDER BY coordinateuncertaintyinmeters::integer DESC)
 
-SELECT gbifid, recordedby, reference, scientificname, year, month, day, verbatimeventdate, coordinateuncertaintyinmeters, high_quality_location_data, informationwithheld 
+SELECT gbifid, recordedby, reference, scientificname, year, month, day, verbatimeventdate, coordinateuncertaintyinmeters, high_quality_location_data, decimallatitude, decimallongitude, informationwithheld, observation_office_note 
 FROM d
-WHERE coordinateuncertaintyinmeters::integer <= 11 --AND informationwithheld IS NOT NULL
+WHERE --coordinateuncertaintyinmeters::integer < 11 AND informationwithheld IS NOT NULL --AND recordedby = 'aaronfwells' --AND reference LIKE '%73978153'
+--coordinateuncertaintyinmeters::integer IS NULL AND length(decimallatitude::text) > 6 AND length(decimallongitude::text) > 8
+high_quality_location_data IS TRUE
 ORDER BY recordedby DESC, year::integer, month::integer, day::integer
 
 /*SELECT kingdom, scientificname, count(scientificname) FROM d
