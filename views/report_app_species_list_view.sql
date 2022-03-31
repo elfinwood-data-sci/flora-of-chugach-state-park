@@ -2,7 +2,7 @@
 
 -- DROP VIEW public.report_app_species_list_view;
 
-CREATE OR REPLACE VIEW public.report_app_species_list_view AS
+--CREATE OR REPLACE VIEW public.report_app_species_list_view AS
 
 WITH d AS (SELECT gbifid::text, familyy, familyx, acceptedscientificname, nameaccepted, authoraccepted, authors, habit, list, basisofrecord, high_quality_location_data, level
 FROM public.gbif_csp_20210211_clipped_foa_taxonomy
@@ -99,9 +99,11 @@ tot AS (SELECT family, nameaccepted, authoraccepted, habit, list, level, inat_h,
 inat_h + inat_l + phys_h + phys_l + unk_h + unk_l AS total_observations
 FROM xyz)
 
-SELECT * FROM tot;
+SELECT * FROM tot
+
+/*;
 
 ALTER TABLE public.report_app_species_list_view
     OWNER TO postgres;
 COMMENT ON VIEW public.report_app_species_list_view
-    IS 'This view creates an appendix for the report that displays the species list from Chugach State Park.';
+    IS 'This view creates an appendix for the report that displays the species list from Chugach State Park.';*/
