@@ -1,3 +1,9 @@
+-- View: public.taxa_by_lifeform_donut_chart_view
+
+-- DROP VIEW public.taxa_by_lifeform_donut_chart_view;
+
+CREATE OR REPLACE VIEW public.taxa_by_lifeform_donut_chart_view AS
+
 WITH d AS (SELECT 
 	CASE 
 		WHEN habit = 'Shrub, Deciduous Tree' THEN 'Shrub'
@@ -38,5 +44,10 @@ srt AS (SELECT
 FROM gbhab)
 
 SELECT * FROM srt 
-ORDER BY sort_order
+ORDER BY sort_order;
+
+ALTER TABLE public.taxa_by_lifeform_donut_chart_view
+    OWNER TO postgres;
+COMMENT ON VIEW public.taxa_by_lifeform_donut_chart_view
+    IS 'The data in this view is used to create a donut chart figure for the Flora of Chugach State Park progress report.';
 
