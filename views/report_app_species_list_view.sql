@@ -4,8 +4,16 @@
 
 --CREATE OR REPLACE VIEW public.report_app_species_list_view AS
 
-WITH d AS (SELECT gbifid::text, familyy, familyx, acceptedscientificname, nameaccepted, authoraccepted, authors, habit, list, basisofrecord, high_quality_location_data, level
-FROM public.gbif_csp_20210211_clipped_foa_taxonomy
+WITH allgbif AS (
+	SELECT gbifid::text, familyy, familyx, acceptedscientificname, nameaccepted, authoraccepted, habit, list, basisofrecord, high_quality_location_data, level,location_in_chugach_state_park
+		FROM public.gbif_csp_20210211_clipped_foa_taxonomy
+	UNION
+	SELECT gbifid::text, familyy, familyx, acceptedscientificname, nameaccepted, authoraccepted, habit, list, basisofrecord, high_quality_location_data, level,location_in_chugach_state_park
+		FROM public.gbif_csp_20220320_clipped_foa_taxonomy
+	),
+
+d AS (SELECT gbifid, familyy, familyx, acceptedscientificname, nameaccepted, authoraccepted, authors, habit, list, basisofrecord, high_quality_location_data, level
+FROM allgbif
 		   LEFT JOIN (SELECT taxon_name, name_status, authors FROM import.mycobank_taxon_list WHERE name_status = 'Legitimate') AS subq ON nameaccepted = taxon_name
 	WHERE location_in_chugach_state_park IS TRUE 
 		AND level NOT IN ('genus','NA') 
@@ -97,9 +105,28 @@ ORDER BY nameaccepted),
 
 tot AS (SELECT family, nameaccepted, authoraccepted, habit, list, level, inat_h, inat_l, phys_h, phys_l, unk_h, unk_l,
 inat_h + inat_l + phys_h + phys_l + unk_h + unk_l AS total_observations
-FROM xyz)
+FROM xyz),
 
-SELECT * FROM tot
+newtaxaobs AS (SELECT ttt.habit, ttt.nameaccepted, ttt.level, tto.list
+FROM (SELECT habit, nameaccepted, level,location_in_chugach_state_park FROM public.gbif_csp_20220320_clipped_foa_taxonomy 
+	  GROUP BY habit, nameaccepted,level,location_in_chugach_state_park) AS ttt
+LEFT JOIN (SELECT scientific_name AS nameaccepted, list, year 
+	  FROM public.observation_location_geometry_view
+		   WHERE year NOT IN ('2022','2021') 
+	  GROUP BY scientific_name, list, year) AS tto 
+	  USING (nameaccepted)
+WHERE list IS NULL AND level IN ('species','subspecies','variety','microspecies','hybrid') AND location_in_chugach_state_park IS TRUE
+ORDER BY ttt.nameaccepted)
+
+--asterisks in CASE statement below indicates new species observation for 2021
+-- 65 new taxa observed from iNaturalist, but still need to add in 2021 voucher specimens
+SELECT family, 
+CASE
+	WHEN nameaccepted IN (SELECT newtaxaobs.nameaccepted FROM newtaxaobs)  THEN tot.nameaccepted || '*'
+	ELSE nameaccepted
+END::text AS nameaccepted, 
+authoraccepted, habit, list, level, inat_h, inat_l, phys_h, phys_l, unk_h, unk_l, total_observations 
+FROM tot
 
 /*;
 
