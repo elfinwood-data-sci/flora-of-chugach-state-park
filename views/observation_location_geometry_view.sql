@@ -1,8 +1,9 @@
 -- View: public.observation_location_geometry_view
+--DETAIL:  view taxa_by_lifeform_donut_chart_view depends on view observation_location_geometry_view
 --3161 records from 2020 and previous + 1487 from 2021 iNaturalist (as of March 29) = 4,648
---DROP VIEW public.observation_location_geometry_view;
+--DROP VIEW public.observation_location_geometry_view --CASCADE;
 
---CREATE OR REPLACE VIEW public.observation_location_geometry_view AS
+CREATE OR REPLACE VIEW public.observation_location_geometry_view AS
 
 WITH gbif AS (SELECT gbifid, decimallatitude, decimallongitude,
 	CASE
@@ -76,9 +77,9 @@ SELECT ogc_fid, obs_data_source, collection_number, decimallatitude, decimallong
 	END::text AS basis_loc, 
 	geom
 FROM gm
-/*;
+;
 
 ALTER TABLE public.observation_location_geometry_view
     OWNER TO aaronwells;
 COMMENT ON VIEW public.observation_location_geometry_view
-    IS 'This view creates a point geometry layer for the observations in Chugach State Park.';*/
+    IS 'This view creates a point geometry layer for the observations in Chugach State Park.';
