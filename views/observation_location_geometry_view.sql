@@ -1,6 +1,7 @@
 -- View: public.observation_location_geometry_view
 --DETAIL:  view taxa_by_lifeform_donut_chart_view depends on view observation_location_geometry_view
 --3161 records from 2020 and previous + 1487 from 2021 iNaturalist (as of March 29) = 4,648
+-- plus 50 rows from 2021 voucher specimens equals 4,698 records
 --DROP VIEW public.observation_location_geometry_view --CASCADE;
 
 CREATE OR REPLACE VIEW public.observation_location_geometry_view AS
