@@ -49,17 +49,21 @@ p <- ggplot(donutd, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=Lifeform)) +
   scale_fill_manual(values = cbPalette) +
   coord_polar(theta="y") +
   xlim(c(-1, 4)) +
-  theme_void() +
-  theme(legend.position = "none")
+  theme_void() 
+  #theme(legend.position = "none")
 
 p1 <- p + scale_color_manual(name = "Lifeform",breaks = c("Coniferous Tree","Deciduous Tree","Low or Tall Shrub","Dwarf Shrub","Forb","Graminoid","Spore-bearing","Moss","Liverwort","Lichen","Fungi"), values = c("Coniferous Tree" = "#009E73","Deciduous Tree" = "#F0E442","Low or Tall Shrub" = "#56B4E9","Dwarf Shrub" = "#0072B2","Forb" = "#CC79A7","Graminoid" = "#7F00FF","Spore-bearing" = "#D55E00","Moss" = "#E69F00","Liverwort" = "#CC0000","Lichen" = "#999999","Fungi" = "#000000")) 
 
-print(p1)
 
 legend <- cowplot::get_legend(p)
 
-grid.newpage()
-grid.draw(legend)
+#grid.newpage()
+#grid.draw(legend)
+pdf(file = "Fig_DonutChart_withLegend_2021.pdf", width = 9, height = 6.5)
+
+print(p1)
+
+dev.off()
 
 #legend not printing in donut chart plot
 #create barchart first with legend, snip out legend
@@ -74,8 +78,12 @@ p <- ggplot(donutd, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=Lifeform)) +
   coord_polar(theta="y") +
   xlim(c(-1, 4)) +
   theme_void() +
-  theme(legend.position = "none")
+  theme(legend.position = "none") #comment this out to create with legend
 
 p1 <- p + scale_color_manual(name = "Lifeform",breaks = c("Coniferous Tree","Deciduous Tree","Low or Tall Shrub","Dwarf Shrub","Forb","Graminoid","Spore-bearing","Moss","Liverwort","Lichen","Fungi"), values = c("Coniferous Tree" = "#009E73","Deciduous Tree" = "#F0E442","Low or Tall Shrub" = "#56B4E9","Dwarf Shrub" = "#0072B2","Forb" = "#CC79A7","Graminoid" = "#7F00FF","Spore-bearing" = "#D55E00","Moss" = "#E69F00","Liverwort" = "#CC0000","Lichen" = "#999999","Fungi" = "#000000")) 
 
+pdf(file = "Fig_DonutChart_withoutLegend_2021.pdf", width = 9, height = 6.5) # change name to withLegend
+
 print(p1)
+
+dev.off()
