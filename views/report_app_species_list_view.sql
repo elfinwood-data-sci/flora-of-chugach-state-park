@@ -1,8 +1,9 @@
 -- View: public.report_app_species_list_view
+-- DETAIL:  view count_of_family_bubble_chart_view depends on view report_app_species_list_view
 
--- DROP VIEW public.report_app_species_list_view;
+--DROP VIEW public.report_app_species_list_view --CASCADE;
 
---CREATE OR REPLACE VIEW public.report_app_species_list_view AS
+CREATE OR REPLACE VIEW public.report_app_species_list_view AS
 
 WITH allgbif AS (
 	SELECT gbifid::text, familyy, familyx, acceptedscientificname, nameaccepted, authoraccepted, habit, list, basisofrecord, high_quality_location_data, level,location_in_chugach_state_park
@@ -116,21 +117,48 @@ LEFT JOIN (SELECT scientific_name AS nameaccepted, list, year
 	  GROUP BY scientific_name, list, year) AS tto 
 	  USING (nameaccepted)
 WHERE list IS NULL AND level IN ('species','subspecies','variety','microspecies','hybrid') AND location_in_chugach_state_park IS TRUE
-ORDER BY ttt.nameaccepted)
+ORDER BY ttt.nameaccepted),
+
+newtaxaobs_vouchers AS (
+	SELECT  ttt.scientific_name, location_in_chugach_state_park
+	FROM (SELECT scientific_name,location_in_chugach_state_park 
+		  FROM public.chugach_state_park_vouchers_uaah_template_v02
+		  WHERE year_collected = '2021'
+		  GROUP BY scientific_name, location_in_chugach_state_park) AS ttt
+	LEFT JOIN (SELECT scientific_name, list, year 
+		  FROM public.observation_location_geometry_view
+			   WHERE year NOT IN ('2022','2021') 
+		  GROUP BY scientific_name, list, year) AS tto 
+		  USING (scientific_name)
+	WHERE list IS NULL AND location_in_chugach_state_park IS TRUE
+	ORDER BY ttt.scientific_name
+),
+
+newtaxaobs_union AS (
+	SELECT nameaccepted FROM newtaxaobs
+	UNION
+	SELECT scientific_name FROM newtaxaobs_vouchers
+	),
 
 --asterisks in CASE statement below indicates new species observation for 2021
--- 65 new taxa observed from iNaturalist, but still need to add in 2021 voucher specimens
-SELECT family, 
+-- 64 new taxa observed from iNaturalist, and 17 from vouchers (2 of which were also observed in 2021 in iNaturalist), for a total of 79 new taxa in 2021
+-- A total of 898 taxa observed across all year and observation types in CSP
+species_list_app AS (SELECT family, 
 CASE
-	WHEN nameaccepted IN (SELECT newtaxaobs.nameaccepted FROM newtaxaobs)  THEN tot.nameaccepted || '*'
+	WHEN nameaccepted IN (SELECT newtaxaobs_union.nameaccepted FROM newtaxaobs_union)  THEN tot.nameaccepted || '*'
 	ELSE nameaccepted
 END::text AS nameaccepted, 
 authoraccepted, habit, list, level, inat_h, inat_l, phys_h, phys_l, unk_h, unk_l, total_observations 
-FROM tot
+FROM tot)
 
-/*;
+SELECT * FROM species_list_app
+
+/*SELECT * FROM species_list_app  --newly observed taxa in 2021
+WHERE nameaccepted LIKE '%\*' AND habit = 'Fungi'*/
+
+;
 
 ALTER TABLE public.report_app_species_list_view
     OWNER TO postgres;
 COMMENT ON VIEW public.report_app_species_list_view
-    IS 'This view creates an appendix for the report that displays the species list from Chugach State Park.';*/
+    IS 'This view creates an appendix for the report that displays the species list from Chugach State Park.';
