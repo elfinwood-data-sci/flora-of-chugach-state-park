@@ -1,7 +1,7 @@
 -- View: public.observation_location_geometry_view
 --DETAIL:  view taxa_by_lifeform_donut_chart_view depends on view observation_location_geometry_view
---3161 records from 2020 and previous + 1487 from 2021 iNaturalist (as of March 29) = 4,648
--- plus 50 rows from 2021 voucher specimens equals 4,698 records
+--3161 records from 2020 and previous + 1487 from 2021 iNaturalist (as of March 29) + 50 rows from 2021 voucher specimens equals 4,698 records
+
 --DROP VIEW public.observation_location_geometry_view --CASCADE;
 
 CREATE OR REPLACE VIEW public.observation_location_geometry_view AS
@@ -76,9 +76,15 @@ SELECT ogc_fid, obs_data_source, collection_number, decimallatitude, decimallong
 		WHEN basisofrecord_agg = 'Unknown' AND high_quality_location_data IS FALSE THEN 'Unknown Obs. Low Quality Loc.'
 		ELSE 'SOMETHING ELSE'
 	END::text AS basis_loc, 
-	geom
-FROM gm
-;
+	geom,
+	CASE
+		WHEN year IN ('2021', '2022') AND high_quality_location_data IS TRUE THEN '2021 High Quality Loc.'
+		WHEN year IN ('2021', '2022') AND high_quality_location_data IS FALSE THEN '2021 Low Quality Loc.'
+		WHEN year NOT IN ('2021', '2022') AND high_quality_location_data IS TRUE THEN 'Pre-2021 High Quality Loc.'
+		WHEN year NOT IN ('2021', '2022') AND high_quality_location_data IS FALSE THEN 'Pre-2021 Low Quality Loc.'
+		ELSE 'SOMETHING ELSE'
+	END::text AS year_loc
+FROM gm;
 
 ALTER TABLE public.observation_location_geometry_view
     OWNER TO aaronwells;
