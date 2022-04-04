@@ -34,13 +34,13 @@ p <- ggplot(bubb35, aes(x=family, y=total_obs, size = as.factor(number_of_taxa_r
   scale_size_manual(values = c(3, 6, 9), labels = c("<10", "10 to 30", ">30")) +
   theme_bw() +
   labs(x = "Taxonomic Family",y = "Number of Observations") +
-  scale_fill_manual(values = c("#0AB45A", "#FA78FA", "#000000", "#A1A1A1", "#F0F032", "#FAE6BE", "#AA0A3C")) +
+  scale_fill_manual(values = c("#0AB45A", "#FA78FA", "#000000", "#A1A1A1", "#F0F032", "#FAE6BE", "#AA0A3C","#56B4E9")) +
   #scale_size(range = c(.1, 10), name="Taxa Observed") +
   theme(axis.text.x = element_text(angle = 45,vjust = 1,hjust = 1)) 
 
 p1 <- p + labs(size = "Taxa Observed",fill = 'Category')
 
-pdf(file = "Fig_Family_Bubble_Chart_9x6pnt5.pdf", width = 9, height = 6.5)
+pdf(file = "Fig_Family_Bubble_Chart_9x6pnt5_2021.pdf", width = 9, height = 6.5)
 
 print(p1)
 
